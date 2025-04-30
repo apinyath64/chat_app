@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Yaldevi:wght@200..700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Message</title>
+</head>
+<body class="font-[Kanit] bg-[#B7B1F2] min-h-screen flex item-center justify-center">
+    <div class="chat-content w-full max-w-2xl block p-6 bg-[#FDFAF6] border border-gray-200 rounded-lg shadow-2xl flex flex-col h-[80vh] my-12">
+        <div class="mb-6">
+            <h3 class="text-center text-[#56544a] text-xl">{{ chat_room.name }}</h3>
+        </div>
+        
+        <div class="message-content flex-1 overflow-y-auto" id="chat_content">
+            {% for msg in messages %}
+            {% if msg.sender != username %}
+            <div class="grid pb-6 receive">
+                <div class="flex gap-2.5 mb-4">
+                <div class="grid">
+                    <h5 class="text-[#56544a] text-sm font-bold leading-snug pb-1">{{ msg.sender }}</h5>
+                    <div class="w-max grid">
+                        <div class="px-3.5 py-2 bg-gray-100 rounded justify-start  items-center gap-3 inline-flex">
+                            <h5 class="text-[#56544a] text-sm font-normal leading-snug">{{ msg.message }}</h5>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="flex gap-2.5 justify-end pb-6 send">
+                <div class="">
+                    <div class="grid mb-2">
+                        <h5 class="text-right text-[#56544a] text-sm font-bold leading-snug pb-1">You</h5>
+                        <div class="px-3 py-2 bg-[#FF90BB] rounded">
+                            <h2 class="text-white text-sm font-normal leading-snug">{{ msg.message }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <form id="message-form" method="post">
+            {% csrf_token %}
+                <div class="w-full pl-3 pr-1 py-1 rounded-3xl border border-gray-200 items-center gap-2 inline-flex justify-between">
+                        <input id="message" class="grow shrink basis-0 px-4 text-black text-xs font-medium leading-4 focus:outline-none" placeholder="พิมพ์ข้อความ...">
+                        <div class="flex items-center gap-2">
+                                <button type="submit" class="submit rounded-full w-10 h-10 items-center flex px-3 py-2 bg-[#FF90BB] shadow focus:ring-2 focus:outline-none focus:ring-[#FF90BB]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16"><path fill="white" d="M226.5 92.9c14.3 42.9-.3 86.2-32.6 96.8s-70.1-15.6-84.4-58.5s.3-86.2 32.6-96.8s70.1 15.6 84.4 58.5zM100.4 198.6c18.9 32.4 14.3 70.1-10.2 84.1s-59.7-.9-78.5-33.3S-2.7 179.3 21.8 165.3s59.7 .9 78.5 33.3zM69.2 401.2C121.6 259.9 214.7 224 256 224s134.4 35.9 186.8 177.2c3.6 9.7 5.2 20.1 5.2 30.5l0 1.6c0 25.8-20.9 46.7-46.7 46.7c-11.5 0-22.9-1.4-34-4.2l-88-22c-15.3-3.8-31.3-3.8-46.6 0l-88 22c-11.1 2.8-22.5 4.2-34 4.2C84.9 480 64 459.1 64 433.3l0-1.6c0-10.4 1.6-20.8 5.2-30.5zM421.8 282.7c-24.5-14-29.1-51.7-10.2-84.1s54-47.3 78.5-33.3s29.1 51.7 10.2 84.1s-54 47.3-78.5 33.3zM310.1 189.7c-32.3-10.6-46.9-53.9-32.6-96.8s52.1-69.1 84.4-58.5s46.9 53.9 32.6 96.8s-52.1 69.1-84.4 58.5z"/></svg>
+                                    <!-- <h3 class="text-white text-xs font-semibold leading-4 px-2">ส่งข้อความ</h3> -->
+                                </button>
+                        </div>
+                    
+                </div>
+        </form>
+    </div>
+</body>
+<script>
+    function message_scolling() {
+        var chatContent = document.getElementById("chat_content");
+        chatContent.scrollTop = chatContent.scrollHeight;
+    }
+
+    const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/{{room}}/`;
+    const socket = new WebSocket(wsEndpoint);
+
+    socket.onopen = (event) => {
+        console.log("Websocket connection opened!");
+    };
+
+    socket.onclose = (event) => {
+        console.log("Websocket connection closed!");
+    };
+
+    document.getElementById('message-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const message = document.getElementById('message').value;
+        socket.send(
+            JSON.stringify({
+                'message': message,
+                'room': '{{room}}',
+                'sender': '{{username}}'
+            })
+        );
+    });
+
+    socket.addEventListener("message", (event) => {
+        const messageData = JSON.parse(event.data)['message'];
+        console.log(messageData);
+
+        var sender = messageData['sender'];
+        var message = messageData['message'];
+
+        if (sender == "{{username}}" ) {
+            document.getElementById('message').value = "";
+        }
+
+        var messageDiv = document.querySelector('.message-content');
+        if (sender != "{{username}}") {
+            messageDiv.innerHTML += '<div class="grid pb-6 receive"><div class="flex gap-2.5 mb-4"><div class="grid"><h5 class="text-[#56544a] text-sm font-bold leading-snug pb-1">' 
+                + sender + '</h5>' + '<div class="w-max grid"><div class="px-3.5 py-2 bg-gray-100 rounded justify-start  items-center gap-3 inline-flex"><h5 class="text-[#56544a] text-sm font-normal leading-snug">' 
+                + message + '</h5></div></div></div></div></div>'
+        } else {
+            messageDiv.innerHTML += '<div class="flex gap-2.5 justify-end pb-6 send"><div class=""><div class="grid mb-2"><h5 class="text-right text-[#56544a] text-sm font-bold leading-snug pb-1">' + 'You' + '</h5>'
+                + '<div class="px-3 py-2 bg-[#FF90BB] rounded"><h2 class="text-white text-sm font-normal leading-snug">'
+                + message + '</h2></div></div></div></div>' 
+        }
+        message_scolling();
+    });
+
+
+</script>
+</html>

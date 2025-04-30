@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Yaldevi:wght@200..700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+   
+    <title>Chatting</title>
+</head>
+<body class="font-[Kanit] bg-[#B7B1F2] min-h-screen flex item-center justify-center">
+     
+    <div class="my-24 block w-auto p-12 bg-[#FDFAF6] border border-gray-200 rounded-lg shadow-2xl">
+
+        <h1 class="mb-2 text-2xl font-bold tracking-tight text-[#56544a]">เข้าร่วมห้องแชทเพื่อเริ่มการสนทนา</h1>
+        <h3 class="text-center text-[#737066]">Join the chat room now!</h3>
+        <form class="max-w-sm mx-auto mt-8" method="post">
+            {% csrf_token %}
+            <div class="mb-5">
+                <label for="username" class="block mb-2 text-md font-medium text-[#737066]">ชื่อผู้ใช้</label>
+                <input type="text" name="username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-300 focus:border-purple-300  block w-full p-2.5" placeholder="" required />
+            </div>
+            <div class="mb-5">
+                <label for="room" class="block mb-2 text-md font-medium text-[#737066]">ห้องแชท</label>
+                <input type="text" name="room" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-300 focus:border-purple-300  block w-full p-2.5" required />
+            </div>
+            <div class="flex justify-center mt-12">
+                <button type="submit" class=" focus:ring-2 focus:outline-none focus:ring-[#FF90BB] font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center text-white bg-[#FF90BB]">เข้าร่วมห้องแชท</button>
+            </div>
+        </form>
+    </div>
+  
+</body>
+</html>
